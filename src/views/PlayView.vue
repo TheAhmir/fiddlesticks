@@ -251,7 +251,7 @@ const giveup = () => {
   }
   
   .left-column, .right-column {
-    font-size: x-small;
+    font-size: small;
     height: 40%;
   }
   
