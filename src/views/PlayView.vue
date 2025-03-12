@@ -3,29 +3,32 @@ import { onMounted, ref} from 'vue'
 import { get_random } from '@/utils/functions';
 import { useWordsStore } from '@/stores/words';
 import {RouterLink, useRouter} from 'vue-router'
+import { readData } from '@/utils/functions';
 
 const router = useRouter();
 const words = useWordsStore();
-const picked = ref({word:"", definition:""});
-const to_guess = ref("")
-const definition = ref("");
+const picked = ref('');
+const to_guess = ref('');
+const definition = ref('');
 
-onMounted(() => {
-  if (words.words.length == 0) {
-    router.replace("/")
-    return
-  }
-  else {
-    picked.value = get_random(words.words);
 
-    if (picked.value) {
-      to_guess.value = picked.value.word
-      definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length));
-      
+onMounted(async () => {
+  try {
+    words.setWords(await readData());
+
+    if (words.words.length > 0) {
+      setup()
     }
-    
+  } catch (error) {
+    console.error('Error loading words:', error)
   }
-})
+});
+
+const setup = () => {
+  picked.value = get_random(words.words);
+  to_guess.value = picked.value.word;
+  definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length));
+}
 const guesses = ref([]);
 const guess = ref('');
 const isFinished = ref(false)
@@ -201,5 +204,56 @@ const giveup = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@media (max-width: 480px) {
+  .page {
+    margin: 0;
+    width: 100%;
+  }
+  .big-container {
+    flex-direction: column;
+  }
+  .guess-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+    margin-left: .5rem;
+    margin-right: .5rem;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .letter {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding: 0rem;
+  }
+  .red, .yellow, .green {
+    border: none;
+  }
+  .red {
+    color: red;
+  }
+  .yellow {
+    color: yellow;
+  }
+  .green {
+    color: green;
+  }
+  .word {
+    font-size: small;
+  }
+
+  .word-input {
+    font-size: 1rem;
+  }
+  
+  .left-column, .right-column {
+    font-size: x-small;
+    height: 40%;
+  }
+  
 }
 </style>
