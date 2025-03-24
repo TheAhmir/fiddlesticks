@@ -45,23 +45,27 @@ const guess = ref('');
 const isFinished = ref(false)
 const num_guesses = ref(5)
 const real_word_popup = ref(false)
+const found = ref([])
 
 const get_colors = (char: string, index: number) => {
   console.log(letter_counts.value)
   if (char == to_guess.value[index]) {
     try {
       delete letter_counts.value[index]
+      found.value.push(char)
     } catch {} finally {
       return 'green'
     }
   } else if (Object.values(letter_counts.value).includes(char)) {
-    if (to_guess.value.includes(char)) {
       return "yellow"
+  } else {
+    console.log(char)
+    console.log(Object.values(found.value))
+    if (Object.values(found.value).includes(char)) {
+      return "none"
     } else {
       return "red"
     }
-  } else {
-    return "none"
   }
 }
 
@@ -252,6 +256,9 @@ const giveup = () => {
 }
 
 @media (max-width: 480px) {
+  .none {
+    color: red;    
+  }
   .page {
     margin: 0;
     width: 100%;
