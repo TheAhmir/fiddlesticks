@@ -15,7 +15,8 @@ const letter_counts = ref<{[key:number]:string}>({});
 
 onMounted(async () => {
   try {
-    words.setWords(await readData());
+    const data = await readData());
+    words.setWords(data);
     setup()
 
   } catch (error) {
