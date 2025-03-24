@@ -6,7 +6,7 @@ import Papa from 'papaparse'
 */
 export async function readData(): Promise<any[]> {
   try {
-    const response = await fetch("/dict.csv")
+    const response = await fetch(`${import.meta.env.BASE_URL}dict.csv`)
     if (!response.ok) {
       throw new Error(`Failed to fetch data: ${response.statusText}`)
     }

@@ -16,7 +16,6 @@ onMounted(async () => {
   try {
     const data = await readData();
     words.setWords(data);
-    setup()
 
   } catch (error) {
   
