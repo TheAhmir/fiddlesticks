@@ -3,13 +3,14 @@ import { onMounted, ref} from 'vue'
 import { get_random } from '@/utils/functions';
 import { useWordsStore } from '@/stores/words';
 import {RouterLink, useRouter} from 'vue-router'
-import { readData } from '@/utils/functions';
+import { readData, is_real_word } from '@/utils/functions';
 
 const router = useRouter();
 const words = useWordsStore();
 const picked = ref('');
 const to_guess = ref('');
 const definition = ref('');
+const letter_counts = ref<{[key:number]:string}>({});
 
 
 onMounted(async () => {
@@ -24,37 +25,80 @@ onMounted(async () => {
   }
 });
 
+const fill_letter_counts = (to_guess: string) => {
+  letter_counts.value = {}
+  for (const [index, letter] of [...to_guess.value].entries()) {
+    letter_counts.value[index] = letter
+   }
+  console.log(letter_counts.value)
+  
+}
+
 const setup = () => {
   picked.value = get_random(words.words);
-  to_guess.value = picked.value.word;
+  to_guess.value = picked.value.word.toLowerCase();
   definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length));
+  fill_letter_counts(to_guess)
 }
 const guesses = ref([]);
 const guess = ref('');
 const isFinished = ref(false)
 const num_guesses = ref(5)
+const real_word_popup = ref(false)
+
+const get_colors = (char: string, index: number) => {
+  console.log(letter_counts.value)
+  if (char == to_guess.value[index]) {
+    try {
+      delete letter_counts.value[index]
+    } catch {} finally {
+      return 'green'
+    }
+  } else if (Object.values(letter_counts.value).includes(char)) {
+    if (to_guess.value.includes(char)) {
+      return "yellow"
+    } else {
+      return "red"
+    }
+  } else {
+    return "none"
+  }
+}
+
+const trigger_popup = () => {
+  real_word_popup.value = true
+
+  setTimeout(() => {
+    real_word_popup.value = false
+  }, [1000])
+}
 
 const restart = () => {
   picked.value = get_random(words.words)
-  to_guess.value = picked.value.word
+  to_guess.value = picked.value.word.toLowerCase()
   definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length))
+  fill_letter_counts(to_guess)
   guesses.value = []
   guess.value = ''
   isFinished.value = false
   num_guesses.value = 5
 }
 
-const submit = () => {
+const submit = async () => {
   if (guess && guess.value.length == to_guess.value.length) {
-    num_guesses.value = num_guesses.value - 1
-    guesses.value.push(guess.value)
-    check()
-    guess.value = ''
+    if (await is_real_word(guess.value.toLowerCase()) || words.words.map(w => w.word.toLowerCase())) {
+      num_guesses.value = num_guesses.value - 1
+      guesses.value.push(guess.value.toLowerCase())
+      check()
+      guess.value = ''
+    } else {
+      trigger_popup()
+    }
   }
 
 }
 const check = () => {
-  if (guess.value === to_guess.value || num_guesses.value <= 0) {
+  if (guess.value.toLowerCase() === to_guess.value || num_guesses.value <= 0) {
     isFinished.value = true
   }
 }
@@ -69,6 +113,7 @@ const giveup = () => {
   <RouterLink to="/">
     <p class="home">Home</p>
   </RouterLink >
+  <div class="real_word_popup" v-if="real_word_popup">Not a real word!</div>
   <div class="word">
     <h1 v-if="isFinished">{{to_guess}}</h1>
     <div v-else class="redacted">
@@ -87,7 +132,7 @@ const giveup = () => {
       </div>
       <div class="guess-container" v-for="guess in guesses" :key="guess">
         <div class='guess-row' >
-          <p v-for="(char, index) in guess" :key="index" :class="['letter', char == to_guess[index] ? 'green' : to_guess.includes(char) ? 'yellow' : 'red']">{{char}}</p>
+          <p v-for="(char, index) in guess" :key="index" :class="['letter', get_colors(char, index)]">{{char}}</p>
         </div>
       </div>
       <form class="word-input-form" @submit="(event) => {event.preventDefault(); submit();}" v-if="!isFinished">
