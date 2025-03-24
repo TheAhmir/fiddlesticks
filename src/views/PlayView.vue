@@ -7,7 +7,7 @@ import { readData, is_real_word } from '@/utils/functions';
 
 const router = useRouter();
 const words = useWordsStore();
-const picked = ref('');
+const picked = ref<{ word: string, definition: string } | null>(null);
 const to_guess = ref('');
 const definition = ref('');
 const letter_counts = ref<{[key:number]:string}>({});
@@ -16,6 +16,7 @@ onMounted(async () => {
   try {
     const data = await readData();
     words.setWords(data);
+    console.log(data)
 
   } catch (error) {
   
@@ -23,9 +24,9 @@ onMounted(async () => {
   }
 });
 
-const fill_letter_counts = (to_guess: string) => {
+const fill_letter_counts = (word: string) => {
   letter_counts.value = {}
-  for (const [index, letter] of [...to_guess.value].entries()) {
+  for (const [index, letter] of [...word].entries()) {
     letter_counts.value[index] = letter
    }
   
@@ -33,9 +34,11 @@ const fill_letter_counts = (to_guess: string) => {
 
 const setup = () => {
   picked.value = get_random(words.words);
-  to_guess.value = picked.value.word.toLowerCase();
-  definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length));
-  fill_letter_counts(to_guess)
+  if (picked.value) {
+    to_guess.value = picked.value.word.toLowerCase();
+    definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length));
+    fill_letter_counts(to_guess.value)
+  }
 }
 
 watch(() => words.words, (newWords) => {
@@ -44,12 +47,12 @@ watch(() => words.words, (newWords) => {
   }
 }, { immediate: true });
 
-const guesses = ref([]);
+const guesses = ref<string[]>([]);
 const guess = ref('');
 const isFinished = ref(false)
 const num_guesses = ref(5)
 const real_word_popup = ref(false)
-const found = ref([])
+const found = ref<string[]>([])
 
 const get_colors = (char: string, index: number) => {
   if (char == to_guess.value[index]) {
@@ -77,14 +80,16 @@ const trigger_popup = () => {
 
   setTimeout(() => {
     real_word_popup.value = false
-  }, [1000])
+  }, 1000)
 }
 
 const restart = () => {
   picked.value = get_random(words.words)
-  to_guess.value = picked.value.word.toLowerCase()
-  definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length))
-  fill_letter_counts(to_guess)
+  if (picked.value) {
+    to_guess.value = picked.value.word.toLowerCase();
+    definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length));
+    fill_letter_counts(to_guess.value)
+  }
   guesses.value = []
   guess.value = ''
   isFinished.value = false

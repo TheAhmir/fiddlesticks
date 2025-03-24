@@ -6,7 +6,8 @@ import Papa from 'papaparse'
 */
 export async function readData(): Promise<any[]> {
   try {
-    const response = await fetch(`${import.meta.env.BASE_URL}dict.csv`)
+    const csvUrl = new URL('./dict.csv', import.meta.url).href;
+    const response = await fetch(csvUrl)
     if (!response.ok) {
       throw new Error(`Failed to fetch data: ${response.statusText}`)
     }
@@ -31,7 +32,7 @@ export async function readData(): Promise<any[]> {
 /**
 * check if is a real word
 */
-export async function is_real_word(word: string, words: []): Promise<boolean> {
+export async function is_real_word(word: string): Promise<boolean> {
   const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
   const data = await response.json()
   return response.ok
