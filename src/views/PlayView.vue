@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { onMounted, ref} from 'vue'
+import {watch, onMounted, ref} from 'vue'
 import { get_random } from '@/utils/functions';
 import { useWordsStore } from '@/stores/words';
 import {RouterLink, useRouter} from 'vue-router'
@@ -11,7 +11,6 @@ const picked = ref('');
 const to_guess = ref('');
 const definition = ref('');
 const letter_counts = ref<{[key:number]:string}>({});
-
 
 onMounted(async () => {
   try {
@@ -39,6 +38,13 @@ const setup = () => {
   definition.value = picked.value.definition.replace(new RegExp(to_guess.value, 'gi'), '*'.repeat(to_guess.value.length));
   fill_letter_counts(to_guess)
 }
+
+watch(() => words.words, (newWords) => {
+  if (newWords.length > 0) {
+    setup(); // Only run setup when words are available
+  }
+}, { immediate: true });
+
 const guesses = ref([]);
 const guess = ref('');
 const isFinished = ref(false)
