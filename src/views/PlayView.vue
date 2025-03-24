@@ -16,11 +16,10 @@ const letter_counts = ref<{[key:number]:string}>({});
 onMounted(async () => {
   try {
     words.setWords(await readData());
+    setup()
 
-    if (words.words.length > 0) {
-      setup()
-    }
   } catch (error) {
+  
     console.error('Error loading words:', error)
   }
 });
@@ -30,7 +29,6 @@ const fill_letter_counts = (to_guess: string) => {
   for (const [index, letter] of [...to_guess.value].entries()) {
     letter_counts.value[index] = letter
    }
-  console.log(letter_counts.value)
   
 }
 
@@ -48,7 +46,6 @@ const real_word_popup = ref(false)
 const found = ref([])
 
 const get_colors = (char: string, index: number) => {
-  console.log(letter_counts.value)
   if (char == to_guess.value[index]) {
     try {
       delete letter_counts.value[index]
