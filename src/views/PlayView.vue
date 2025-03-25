@@ -16,7 +16,7 @@ onMounted(async () => {
   try {
     const data = await readData();
     words.setWords(data);
-    console.log(data)
+    setup(); // Only run setup when words are available
 
   } catch (error) {
   
@@ -41,12 +41,6 @@ const setup = () => {
   }
 }
 
-watch(() => words.words, (newWords) => {
-  if (newWords.length > 0) {
-    setup(); // Only run setup when words are available
-  }
-}, { immediate: true });
-
 const guesses = ref<string[]>([]);
 const guess = ref('');
 const isFinished = ref(false)
@@ -65,8 +59,6 @@ const get_colors = (char: string, index: number) => {
   } else if (Object.values(letter_counts.value).includes(char)) {
       return "yellow"
   } else {
-    console.log(char)
-    console.log(Object.values(found.value))
     if (Object.values(found.value).includes(char)) {
       return "none"
     } else {
@@ -98,7 +90,7 @@ const restart = () => {
 
 const submit = async () => {
   if (guess && guess.value.length == to_guess.value.length) {
-    if (await is_real_word(guess.value.toLowerCase()) || words.words.map(w => w.word.toLowerCase())) {
+    if (await is_real_word(guess.value.toLowerCase()) || words.words.map(w => w.word.toLowerCase()).includes(guess.value)) {
       num_guesses.value = num_guesses.value - 1
       guesses.value.push(guess.value.toLowerCase())
       check()
