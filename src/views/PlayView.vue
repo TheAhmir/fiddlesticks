@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import {watch, onMounted, ref} from 'vue'
+import {watch, onMounted, ref, nextTick} from 'vue'
 import { get_random } from '@/utils/functions';
 import { useWordsStore } from '@/stores/words';
 import {RouterLink, useRouter} from 'vue-router'
@@ -16,6 +16,7 @@ onMounted(async () => {
   try {
     const data = await readData();
     words.setWords(data);
+    await nextTick()
     setup(); // Only run setup when words are available
 
   } catch (error) {
@@ -89,11 +90,11 @@ const restart = () => {
 }
 
 const submit = async () => {
-  if (guess && guess.value.length == to_guess.value.length) {
+  if (guess && guess.value?.length == to_guess.value.length) {
     if (await is_real_word(guess.value.toLowerCase()) || words.words.map(w => w.word.toLowerCase()).includes(guess.value)) {
       num_guesses.value = num_guesses.value - 1
       guesses.value.push(guess.value.toLowerCase())
-      check()
+      <!-- check() -->
       guess.value = ''
     } else {
       trigger_popup()
@@ -106,6 +107,11 @@ const check = () => {
     isFinished.value = true
   }
 }
+
+watch(guesses, () => {
+  check();
+});
+
 
 const giveup = () => {
   isFinished.value = true
