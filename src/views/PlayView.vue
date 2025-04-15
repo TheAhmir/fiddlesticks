@@ -48,6 +48,7 @@ const isFinished = ref(false)
 const num_guesses = ref(5)
 const real_word_popup = ref(false)
 const found = ref<string[]>([])
+const isSubmitting = ref(false);
 
 const get_colors = (char: string, index: number) => {
   if (char == to_guess.value[index]) {
@@ -90,15 +91,22 @@ const restart = () => {
 }
 
 const submit = async () => {
-  if (guess && guess.value?.length == to_guess.value.length) {
-    if (await is_real_word(guess.value.toLowerCase()) || words.words.map(w => w.word.toLowerCase()).includes(guess.value)) {
-      num_guesses.value = num_guesses.value - 1
-      guesses.value.push(guess.value.toLowerCase())
-      check()
-      guess.value = ''
-    } else {
-      trigger_popup()
+  if (isSubmitting.value) return
+  isSubmitting.value = true
+
+  try {
+    if (guess && guess.value?.length == to_guess.value.length) {
+      if (await is_real_word(guess.value.toLowerCase()) || words.words.map(w => w.word.toLowerCase()).includes(guess.value)) {
+        num_guesses.value = num_guesses.value - 1
+        guesses.value.push(guess.value.toLowerCase())
+        check()
+        guess.value = ''
+      } else {
+        trigger_popup()
+      }
     }
+  } finally {
+    isSubmitting.value = false
   }
 
 }

@@ -34,14 +34,14 @@ export async function readData(): Promise<any[]> {
 */
 export async function is_real_word(word: string): Promise<boolean> {
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`, {
-      method: 'HEAD'
-    })
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
 
-    if (!response.ok) return false
+    if (response.body) {
+      const reader = response.body.getReader()
+      reader.cancel().catch(() => {})
+    }
     
-    response.body?.cancel()
-    return true
+    return response.ok
   } catch {
     return false
   }
