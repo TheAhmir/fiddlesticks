@@ -37,7 +37,11 @@ export async function is_real_word(word: string): Promise<boolean> {
     const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`, {
       method: 'HEAD'
     })
-    return response.ok
+
+    if (!response.ok) return false
+    
+    response.body?.cancel()
+    return true
   } catch {
     return false
   }
