@@ -34,7 +34,6 @@ export async function readData(): Promise<any[]> {
 */
 export async function is_real_word(word: string): Promise<boolean> {
   const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-  const data = await response.json()
   return response.ok
 }
 
