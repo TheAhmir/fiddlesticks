@@ -94,7 +94,7 @@ const submit = async () => {
     if (await is_real_word(guess.value.toLowerCase()) || words.words.map(w => w.word.toLowerCase()).includes(guess.value)) {
       num_guesses.value = num_guesses.value - 1
       guesses.value.push(guess.value.toLowerCase())
-      <!-- check() -->
+      check()
       guess.value = ''
     } else {
       trigger_popup()
