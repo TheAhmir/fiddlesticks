@@ -33,8 +33,12 @@ export async function readData(): Promise<any[]> {
 * check if is a real word
 */
 export async function is_real_word(word: string): Promise<boolean> {
-  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-  return response.ok
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+    return response.ok
+  } catch {
+    return false
+  }
 }
 
 /**
